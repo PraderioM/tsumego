@@ -1,24 +1,60 @@
-from typing import List, Optional, Tuple
+from glob import glob
+import os
 from random import randint
+from typing import Optional, Tuple
 
 import cv2
 import numpy as np
+from pdf2image import convert_from_path
 
 from constants import WINDOW_NAME
-from models import Stone, Manager
+from models import Manager
+from store_results import store_results
 
 
-def solve_tsumego(tsumego: np.ndarray, h: int, w: int, r: int) -> List[Stone]:
+def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: int, r: int):
+    current_page = first_page
+    while True:
+        # Read pdf and get corresponding page from it.
+        pages = convert_from_path(tsumego_path, first_page=current_page, last_page=current_page)
+        if len(pages) == 0:
+            print('Last pdf page has been reached.')
+            break
+
+        tsumego_page = np.array(pages[0])
+
+        # Get path to where solutions will be stored.
+        all_solved_tsumegos = glob(os.path.join(out_dir, '*'))
+        out_path = os.path.join(out_dir, f'page_{current_page:03}.png')
+        variation_number = 1
+        while out_path in all_solved_tsumegos:
+            out_path = os.path.join(out_dir, f'page_{current_page:03}_variation_{variation_number}.png')
+            variation_number += 1
+
+        # Solve tsumego page and store results.
+        next_page = solve_tsumego_page(tsumego=tsumego_page, out_path=out_path, h=h, w=w, r=r)
+
+        # Go to the next page or exit program.
+        if not next_page:
+            print('Goodbye. See you soon.')
+            break
+
+        current_page += 1
+
+
+def solve_tsumego_page(tsumego: np.ndarray, out_path: str, h: int, w: int, r: int) -> bool:
     # setup.
     manager = Manager(tsumego=tsumego, show_height=h, show_width=w, stone_size=r)
     print_instructions()
 
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_GUI_NORMAL + cv2.WINDOW_AUTOSIZE)
     set_mouse_callbacks(manager=manager)
-    start_loop(manager=manager)
+    exit_editor = start_loop(manager=manager)
     cv2.destroyWindow(WINDOW_NAME)
 
-    return manager.solutions
+    store_results(tsumego=tsumego, path=out_path, solutions=manager.solutions, stone_size=r)
+
+    return not exit_editor
 
 
 def set_mouse_callbacks(manager: Manager):
@@ -32,7 +68,7 @@ def set_mouse_callbacks(manager: Manager):
     cv2.setMouseCallback(WINDOW_NAME, mouse_callback)
 
 
-def start_loop(manager: Manager):
+def start_loop(manager: Manager) -> bool:
     # Initialize images.
     image = manager.get_showed_image()
 
@@ -57,7 +93,7 @@ def start_loop(manager: Manager):
         key = cv2.waitKey(1) & 0xFF
 
         # Process pressed key.
-        break_loop = process_key(key=key, manager=manager)
+        break_loop, exit_editor = process_key(key=key, manager=manager)
 
         if break_loop:
             break
@@ -72,9 +108,12 @@ def start_loop(manager: Manager):
         #     intensity = 0
         #     direction = 1
 
+        return exit_editor
 
-def process_key(key: int, manager: Manager) -> bool:
+
+def process_key(key: int, manager: Manager) -> Tuple[bool, bool]:
     break_loop = False
+    exit_editor = False
     if key == ord('c'):
         manager.change_color()
         manager.refresh = True
@@ -86,10 +125,13 @@ def process_key(key: int, manager: Manager) -> bool:
         manager.refresh = True
     elif key == ord('v'):
         manager.toggle_stone_visibility()
+    elif key == ord('n'):
+        break_loop = True
     elif key == ord('q'):
         break_loop = True
+        exit_editor = True
 
-    return break_loop
+    return break_loop, exit_editor
 
 
 def print_instructions():
@@ -98,6 +140,7 @@ KEYBOARD COMMANDS:
   `c`: Change color.
   `p`: Reset numbering.
   `b`: Remove last stone.
+  `n`: Save current and go to next page.
   `q`: Save and quit tsumego.
   `v`: toggle stone visibility.
   `click`: Add new stone.
