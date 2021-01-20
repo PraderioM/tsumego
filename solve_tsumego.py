@@ -13,7 +13,15 @@ from store_results import store_results
 
 
 def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: int, r: int):
+    # Setup.
     current_page = first_page
+    print_instructions()
+
+    # Initialize window.
+    manager = Manager(tsumego=np.zeros([10, 10, 3]), show_height=h, show_width=w, stone_size=r)
+    cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_GUI_NORMAL + cv2.WINDOW_AUTOSIZE)
+    set_mouse_callbacks(manager=manager)
+
     while True:
         # Read pdf and get corresponding page from it.
         pages = convert_from_path(tsumego_path, first_page=current_page, last_page=current_page)
@@ -22,6 +30,7 @@ def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: i
             break
 
         tsumego_page = np.array(pages[0])
+        manager.reset(tsumego=tsumego_page)
 
         # Get path to where solutions will be stored.
         all_solved_tsumegos = glob(os.path.join(out_dir, '*'))
@@ -32,29 +41,17 @@ def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: i
             variation_number += 1
 
         # Solve tsumego page and store results.
-        next_page = solve_tsumego_page(tsumego=tsumego_page, out_path=out_path, h=h, w=w, r=r)
+        exit_editor = start_loop(manager=manager)
+        store_results(tsumego=tsumego_page, path=out_path, solutions=manager.solutions, stone_size=r)
 
         # Go to the next page or exit program.
-        if not next_page:
+        if exit_editor:
             print('Goodbye. See you soon.')
             break
 
         current_page += 1
 
-
-def solve_tsumego_page(tsumego: np.ndarray, out_path: str, h: int, w: int, r: int) -> bool:
-    # setup.
-    manager = Manager(tsumego=tsumego, show_height=h, show_width=w, stone_size=r)
-    print_instructions()
-
-    cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_GUI_NORMAL + cv2.WINDOW_AUTOSIZE)
-    set_mouse_callbacks(manager=manager)
-    exit_editor = start_loop(manager=manager)
     cv2.destroyWindow(WINDOW_NAME)
-
-    store_results(tsumego=tsumego, path=out_path, solutions=manager.solutions, stone_size=r)
-
-    return not exit_editor
 
 
 def set_mouse_callbacks(manager: Manager):
@@ -108,7 +105,7 @@ def start_loop(manager: Manager) -> bool:
         #     intensity = 0
         #     direction = 1
 
-        return exit_editor
+    return exit_editor
 
 
 def process_key(key: int, manager: Manager) -> Tuple[bool, bool]:

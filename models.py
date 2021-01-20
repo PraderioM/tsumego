@@ -56,6 +56,7 @@ class Stone:
 class Manager:
     FIRST_STONE_NUMBER = 1
     FIRST_STONE_BLACK = True
+    DEFAULT_VISIBLE_STATE = True
 
     def __init__(self, tsumego: np.ndarray, show_height: int, show_width: int, stone_size: int):
         self._solutions: List[Stone] = []
@@ -66,7 +67,15 @@ class Manager:
         self._current_number = self.FIRST_STONE_NUMBER
         self._current_black = self.FIRST_STONE_BLACK
         self._tsumego = tsumego
-        self._stone_visible = True
+        self._stone_visible = self.DEFAULT_VISIBLE_STATE
+
+    def reset(self, tsumego: np.ndarray):
+        self._solutions: List[Stone] = []
+        self.refresh = False
+        self._current_number = self.FIRST_STONE_NUMBER
+        self._current_black = self.FIRST_STONE_BLACK
+        self._stone_visible = self.DEFAULT_VISIBLE_STATE
+        self.tsumego = tsumego
 
     def add_stone(self, stone: Stone):
         self._solutions.append(stone)
@@ -111,6 +120,15 @@ class Manager:
         for stone in self._solutions:
             showed_image = stone.draw_on_image(img=showed_image, size=self._stone_size)
         return cv2.resize(showed_image, (self._show_width, self._show_height))
+
+    @property
+    def tsumego(self):
+        return self._tsumego.copy()
+
+    @tsumego.setter
+    def tsumego(self, img: np.ndarray):
+        self._tsumego = img.copy()
+        self.refresh = True
 
     @property
     def solutions(self) -> List[Stone]:

@@ -10,7 +10,7 @@ def main():
     ratio = 297 / 210
     h = get_positive_integer('board height', default_val=int(width * ratio))
     w = get_positive_integer('board width', default_val=width)
-    stone_size = get_positive_integer('stone size', default_val=21)
+    stone_size = get_positive_integer('stone size', default_val=28)
     solve_tsumego(tsumego_path=tsumego_path, first_page=first_page, out_dir=out_dir, h=h, w=w, r=stone_size)
 
 
