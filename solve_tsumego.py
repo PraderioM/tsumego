@@ -12,7 +12,8 @@ from models import Manager
 from store_results import store_results
 
 
-def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: int, r: int):
+def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: int, r: int,
+                  show_fairy_lights: bool = False):
     # Setup.
     current_page = first_page
     print_instructions()
@@ -41,7 +42,7 @@ def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: i
             variation_number += 1
 
         # Solve tsumego page and store results.
-        exit_editor = start_loop(manager=manager)
+        exit_editor = start_loop(manager=manager, show_fairy_lights=show_fairy_lights)
         store_results(tsumego=tsumego_page, path=out_path, solutions=manager.solutions, stone_size=r)
 
         # Go to the next page or exit program.
@@ -65,15 +66,18 @@ def set_mouse_callbacks(manager: Manager):
     cv2.setMouseCallback(WINDOW_NAME, mouse_callback)
 
 
-def start_loop(manager: Manager) -> bool:
+def start_loop(manager: Manager, show_fairy_lights: bool = False,
+               fairy_lights_semi_period: int = 1500,
+               intensity: int = 0,
+               direction: int = 1) -> bool:
     # Initialize images.
     image = manager.get_showed_image()
 
-    # # Start fairy lights
-    # fairy_lights_positions = get_fairy_lights_positions(image)
-    # fairy_lights_semi_period = 1500
-    # intensity = 0
-    # direction = 1
+    # Start fairy lights
+    if show_fairy_lights:
+        fairy_lights_positions = get_fairy_lights_positions(image)
+    else:
+        fairy_lights_positions = ()
 
     # Show images in a loop.
     while True:
@@ -83,10 +87,12 @@ def start_loop(manager: Manager) -> bool:
             manager.refresh = False
 
         # Show images and process key-board callbacks.
-        # cv2.imshow(WINDOW_NAME, put_fairy_lights(image.copy(), positions=fairy_lights_positions,
-        #                                          intensity=intensity,
-        #                                          color=(20, 99, 156)))
-        cv2.imshow(WINDOW_NAME, image)
+        if show_fairy_lights:
+            cv2.imshow(WINDOW_NAME, put_fairy_lights(image.copy(), positions=fairy_lights_positions,
+                                                     intensity=intensity,
+                                                     color=(20, 99, 156)))
+        else:
+            cv2.imshow(WINDOW_NAME, image)
         key = cv2.waitKey(1) & 0xFF
 
         # Process pressed key.
@@ -95,15 +101,16 @@ def start_loop(manager: Manager) -> bool:
         if break_loop:
             break
 
-        # # Change fairy light intensity.
-        # intensity += direction / fairy_lights_semi_period
-        #
-        # if intensity >= 1:
-        #     intensity = 1
-        #     direction = -1
-        # elif intensity <= 0:
-        #     intensity = 0
-        #     direction = 1
+        # Change fairy light intensity.
+        if show_fairy_lights:
+            intensity += direction / fairy_lights_semi_period
+
+            if intensity >= 1:
+                intensity = 1
+                direction = -1
+            elif intensity <= 0:
+                intensity = 0
+                direction = 1
 
     return exit_editor
 
@@ -151,7 +158,7 @@ def put_fairy_lights(image: np.ndarray,
                      color: Tuple[int, int, int] = (255, 255, 255)) -> np.ndarray:
     for cx, cy in positions:
         img_color = tuple(image[cy, cx].tolist())
-        new_color = tuple([min(255, max(0, int(c1 * (1-intensity) + c2 * intensity)))
+        new_color = tuple([min(255, max(0, int(c1 * (1 - intensity) + c2 * intensity)))
                            for c1, c2 in zip(img_color, color)])
         image = cv2.circle(image, center=(cx, cy), radius=radius, color=new_color, thickness=-1)
 

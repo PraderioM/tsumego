@@ -1,9 +1,7 @@
 import os
-from typing import Optional, Tuple
+from typing import Optional
 
-import cv2
 from pdf2image import convert_from_path
-import numpy as np
 
 NO_ANSWERS = ('n', 'no', 'nope')
 YES_ANSWERS = ('y', 'yes', 'yep')
@@ -66,3 +64,24 @@ def get_positive_integer(size_name: str, default_val: int = 768) -> int:
             print('Please insert a valid integer.')
         else:
             return max(1, int(size_string))
+
+
+def get_bool(message: str, default: bool) -> bool:
+    if default:
+        message = message + ' [Y/n]\n\t'
+    else:
+        message = message + ' [y/N]\n\t'
+
+    while True:
+        response = input(message)
+
+        if len(response) == 0:
+            return default
+
+        response = response.lower()
+        if response in YES_ANSWERS:
+            return True
+        elif response in NO_ANSWERS:
+            return False
+        else:
+            print('I do not understand please repeat your answer.')
