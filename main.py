@@ -15,8 +15,10 @@ def main():
     show_fairy_lights = get_bool(message='Do you want to add fairy lights to your tsumego?', default=False)
     last_page = solve_tsumego(tsumego_path=tsumego_path, first_page=first_page, out_dir=out_dir, h=h, w=w, r=stone_size,
                               show_fairy_lights=show_fairy_lights)
-    if get_bool(message='Do you want to join all tsumego images?', default=True):
-        join_images(first_page=first_page, last_page=last_page, out_dir=out_dir)
+
+    if last_page > first_page:
+        if get_bool(message='Do you want to join all tsumego images?', default=True):
+            join_images(first_page=first_page, last_page=last_page, out_dir=out_dir)
 
 
 # Press the green button in the gutter to run the script.
