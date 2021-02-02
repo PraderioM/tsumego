@@ -9,7 +9,7 @@ from pdf2image import convert_from_path
 
 from constants import WINDOW_NAME
 from models import Manager
-from store_results import store_results
+from store_results import store_results, get_out_image_name
 
 
 def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: int, r: int,
@@ -35,11 +35,11 @@ def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: i
 
         # Get path to where solutions will be stored.
         all_solved_tsumegos = glob(os.path.join(out_dir, '*'))
-        out_path = os.path.join(out_dir, f'page_{current_page:03}.png')
-        variation_number = 1
+        variation_number = 0
+        out_path = get_out_image_name(out_dir, current_page, variation_number)
         while out_path in all_solved_tsumegos:
-            out_path = os.path.join(out_dir, f'page_{current_page:03}_variation_{variation_number}.png')
             variation_number += 1
+            out_path = get_out_image_name(out_dir, current_page, variation_number)
 
         # Solve tsumego page and store results.
         exit_editor = start_loop(manager=manager, show_fairy_lights=show_fairy_lights)
@@ -53,6 +53,7 @@ def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: i
         current_page += 1
 
     cv2.destroyWindow(WINDOW_NAME)
+    return current_page
 
 
 def set_mouse_callbacks(manager: Manager):
