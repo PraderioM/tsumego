@@ -1,6 +1,6 @@
 from parameters_setting import get_tsumego, get_solved_tsumego_dir, get_positive_integer, get_bool
 from solve_tsumego import solve_tsumego
-from store_results import join_images
+from store_results import store_joint_images
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
 
     if last_page > first_page:
         if get_bool(message='Do you want to join all tsumego images?', default=True):
-            join_images(first_page=first_page, last_page=last_page, out_dir=out_dir)
+            store_joint_images(first_page=first_page, last_page=last_page, out_dir=out_dir)
 
 
 # Press the green button in the gutter to run the script.

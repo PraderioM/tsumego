@@ -1,11 +1,12 @@
 from glob import glob
 import os
-from typing import List, Optional
+from typing import List
 
 import cv2
 import numpy as np
 
 from models import Stone
+from join_images import join_images
 
 
 def store_results(tsumego: np.ndarray, path: str, solutions: List[Stone], stone_size: int = 10):
@@ -17,7 +18,7 @@ def store_results(tsumego: np.ndarray, path: str, solutions: List[Stone], stone_
     cv2.imwrite(path, img=out_tsumego)
 
 
-def join_images(first_page: int, last_page: int, out_dir: str):
+def store_joint_images(first_page: int, last_page: int, out_dir: str):
     image_path_list: List[str] = []
     all_tsumego = list(glob(os.path.join(out_dir, '*')))
     for page in range(first_page, last_page + 1):
@@ -33,19 +34,10 @@ def join_images(first_page: int, last_page: int, out_dir: str):
         image_path = get_out_image_name(out_dir=out_dir, page=page, variation=variation - 1)
         image_path_list.append(image_path)
 
-    joined_image: Optional[np.ndarray] = None
-    h: Optional[int] = None
-    w: Optional[int] = None
-    for image_path in image_path_list:
-        image = cv2.imread(image_path)
-        if h is None or w is None:
-            h, w, _ = image.shape
-        image = cv2.resize(image, (w, h))
+    joined_image = join_images(image_path_list=image_path_list)
 
-        if joined_image is None:
-            joined_image = image
-        else:
-            joined_image = np.concatenate([joined_image, image], axis=0)
+    out_path = get_joined_image_name(out_dir=out_dir)
+    cv2.imwrite(out_path, joined_image)
 
 
 def get_out_image_name(out_dir: str, page: int, variation: int = 0) -> str:
