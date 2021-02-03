@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt, ceil
 from typing import List, Optional
 
 import cv2
@@ -9,7 +9,7 @@ def join_images(image_path_list: List[str]):
     h: Optional[int] = None
     w: Optional[int] = None
     n = len(image_path_list)
-    n_cols = int(sqrt(n))
+    n_cols = int(ceil(sqrt(n)))
 
     joined_image: Optional[np.ndarray] = None
     while len(image_path_list) > 0:

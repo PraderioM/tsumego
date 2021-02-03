@@ -18,7 +18,8 @@ def main():
 
     if last_page > first_page:
         if get_bool(message='Do you want to join all tsumego images?', default=True):
-            store_joint_images(first_page=first_page, last_page=last_page, out_dir=out_dir)
+            n = get_positive_integer('number of joined images', default_val=6)
+            store_joint_images(first_page=first_page, last_page=last_page, out_dir=out_dir, n=n)
 
 
 # Press the green button in the gutter to run the script.
