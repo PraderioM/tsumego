@@ -42,8 +42,9 @@ def solve_tsumego(tsumego_path: str, first_page: int, out_dir: str, h: int, w: i
             out_path = get_out_image_name(out_dir, current_page, variation_number)
 
         # Solve tsumego page and store results.
-        exit_editor = start_loop(manager=manager, show_fairy_lights=show_fairy_lights)
-        store_results(tsumego=tsumego_page, path=out_path, solutions=manager.solutions, stone_size=r)
+        exit_editor, save_tsumego = start_loop(manager=manager, show_fairy_lights=show_fairy_lights)
+        if save_tsumego:
+            store_results(tsumego=tsumego_page, path=out_path, solutions=manager.solutions, stone_size=r)
 
         # Go to the next page or exit program.
         if exit_editor:
@@ -70,7 +71,7 @@ def set_mouse_callbacks(manager: Manager):
 def start_loop(manager: Manager, show_fairy_lights: bool = False,
                fairy_lights_semi_period: int = 1500,
                intensity: int = 0,
-               direction: int = 1) -> bool:
+               direction: int = 1) -> Tuple[bool, bool]:
     # Initialize images.
     image = manager.get_showed_image()
 
@@ -97,7 +98,7 @@ def start_loop(manager: Manager, show_fairy_lights: bool = False,
         key = cv2.waitKey(1) & 0xFF
 
         # Process pressed key.
-        break_loop, exit_editor = process_key(key=key, manager=manager)
+        break_loop, exit_editor, save_tsumego = process_key(key=key, manager=manager)
 
         if break_loop:
             break
@@ -113,12 +114,13 @@ def start_loop(manager: Manager, show_fairy_lights: bool = False,
                 intensity = 0
                 direction = 1
 
-    return exit_editor
+    return exit_editor, save_tsumego
 
 
-def process_key(key: int, manager: Manager) -> Tuple[bool, bool]:
+def process_key(key: int, manager: Manager) -> Tuple[bool, bool, bool]:
     break_loop = False
     exit_editor = False
+    save_tsumego = True
     if key == ord('c'):
         manager.change_color()
         manager.refresh = True
@@ -132,11 +134,18 @@ def process_key(key: int, manager: Manager) -> Tuple[bool, bool]:
         manager.toggle_stone_visibility()
     elif key == ord('n'):
         break_loop = True
+    elif key == ord('s'):
+        break_loop = True
+        save_tsumego = False
     elif key == ord('q'):
         break_loop = True
         exit_editor = True
+    elif key == ord('e'):
+        break_loop = True
+        exit_editor = True
+        save_tsumego = False
 
-    return break_loop, exit_editor
+    return break_loop, exit_editor, save_tsumego
 
 
 def print_instructions():
@@ -146,6 +155,8 @@ KEYBOARD COMMANDS:
   `p`: Reset numbering.
   `b`: Remove last stone.
   `n`: Save current and go to next page.
+  `s`: Skip current and go to next page.
+  `e`: Quit without saving.
   `q`: Save and quit tsumego.
   `v`: toggle stone visibility.
   `click`: Add new stone.

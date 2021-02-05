@@ -21,15 +21,24 @@ def store_results(tsumego: np.ndarray, path: str, solutions: List[Stone], stone_
 def store_joint_images(first_page: int, last_page: int, out_dir: str, n: int = 6):
     image_path_list: List[str] = []
     all_tsumego = list(glob(os.path.join(out_dir, '*')))
+    is_variation_decided = False
+    variation = 0
     for page in range(first_page, last_page + 1):
-        variation = 0
         image_path = get_out_image_name(out_dir=out_dir, page=page, variation=variation)
-        while image_path in all_tsumego:
-            variation += 1
-            image_path = get_out_image_name(out_dir=out_dir, page=page, variation=variation)
+
+        if not is_variation_decided:
+            while image_path in all_tsumego:
+                variation += 1
+                image_path = get_out_image_name(out_dir=out_dir, page=page, variation=variation)
+            variation -= 1
 
         if variation == 0:
             continue
+        else:
+            if image_path in all_tsumego:
+                is_variation_decided = True
+            else:
+                continue
 
         image_path = get_out_image_name(out_dir=out_dir, page=page, variation=variation - 1)
         image_path_list.append(image_path)
