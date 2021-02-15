@@ -28,7 +28,7 @@ def get_tsumego() -> str:
 
 
 def get_solved_tsumego_dir(tsumego_path: Optional[str] = None) -> str:
-    ask_message = 'Insert directory where solved tsumego will be stored.'
+    ask_message = 'Insert directory where solved tsumego will be stored'
     # Get default.
     if tsumego_path is None:
         default_out_dir = ''
