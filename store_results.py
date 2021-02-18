@@ -34,6 +34,7 @@ def store_joint_images(first_page: int, last_page: int, out_dir: str, n: int = 6
             image_path = get_out_image_name(out_dir=out_dir, page=page, variation=variation)
 
         if variation == -1:
+            variation = 0
             continue
         else:
             if image_path in all_tsumego:
