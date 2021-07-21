@@ -7,10 +7,17 @@ NO_ANSWERS = ('n', 'no', 'nope')
 YES_ANSWERS = ('y', 'yes', 'yep')
 
 
-def get_tsumego() -> str:
+def get_tsumego(default_path: Optional[str] = None) -> str:
     while True:
-        tsumego_path = input('Insert path to tsumego pdf:\n\t')
+        if default_path is None:
+            tsumego_path = input('Insert path to tsumego pdf:\n\t')
+        else:
+            tsumego_path = input(f'Insert path to tsumego pdf [{default_path}]:\n\t')
+            if len(tsumego_path) == 0:
+                tsumego_path = default_path
+
         tsumego_path = os.path.abspath(tsumego_path)
+
         if not os.path.exists(tsumego_path):
             print(f'There is no file with location `{tsumego_path}`.')
         else:
