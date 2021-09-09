@@ -69,7 +69,7 @@ def set_mouse_callbacks(manager: Manager):
 
 
 def start_loop(manager: Manager, show_fairy_lights: bool = False,
-               fairy_lights_semi_period: int = 1500,
+               fairy_lights_semi_period: int = 15,
                intensity: int = 0,
                direction: int = 1) -> Tuple[bool, bool]:
     # Initialize images.
@@ -95,7 +95,7 @@ def start_loop(manager: Manager, show_fairy_lights: bool = False,
                                                      color=(20, 99, 156)))
         else:
             cv2.imshow(WINDOW_NAME, image)
-        key = cv2.waitKey(1) & 0xFF
+        key = cv2.waitKey(100) & 0xFF
 
         # Process pressed key.
         break_loop, exit_editor, save_tsumego = process_key(key=key, manager=manager)
