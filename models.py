@@ -95,6 +95,7 @@ class Manager:
     def reset_numbering(self):
         self._current_black = self.FIRST_STONE_BLACK
         self._current_number = self.FIRST_STONE_NUMBER
+        self._stone_visible = self.DEFAULT_VISIBLE_STATE
 
     def change_color(self):
         self._current_black = not self._current_black
