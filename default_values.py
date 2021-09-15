@@ -1,11 +1,12 @@
 import os
+from math import sqrt
 from typing import Dict, Optional, Union
 import json
 
 
 class DefaultHandler:
     DEFAULT_VALUES_PATH = './cookies.json'
-    HEIGHT_TO_WIDTH_RATIO = 297 / 210
+    HEIGHT_TO_WIDTH_RATIO = (1 + sqrt(5)) / 2
 
     @classmethod
     def from_json(cls, json_data: Dict[str, Union[int, None, str, bool]]):
